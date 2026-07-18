@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OwnScreen</string>
+    <string name="notification_tracking_title">OwnScreen is tracking usage</string>
+</resources>

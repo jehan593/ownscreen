@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simple clock mark, kept within the ~66dp adaptive-icon safe zone of the 108dp viewport -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#88C0D0"
+        android:pathData="M54,54 m -30,0 a 30,30 0 1,0 60,0 a 30,30 0 1,0 -60,0" />
+    <path
+        android:fillColor="#2E3440"
+        android:pathData="M54,54 m -24,0 a 24,24 0 1,0 48,0 a 24,24 0 1,0 -48,0" />
+    <path
+        android:fillColor="#88C0D0"
+        android:pathData="M52,32 L56,32 L56,55 L52,55 Z" />
+    <path
+        android:fillColor="#88C0D0"
+        android:pathData="M54,54 L68,60 L66,64 L54,58 Z" />
+    <path
+        android:fillColor="#88C0D0"
+        android:pathData="M54,54 m -4,0 a 4,4 0 1,0 8,0 a 4,4 0 1,0 -8,0" />
+</vector>

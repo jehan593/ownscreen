@@ -1,0 +1,48 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      # Downloadable from the Actions tab for this specific run (kept for ~90 days).
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ownscreen-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      # A single rolling "latest" release, overwritten on every push to main — gives a stable,
+      # permanent URL that always has the current build:
+      # https://github.com/<owner>/<repo>/releases/download/latest/app-debug.apk
+      - name: Publish to "latest" release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest
+          name: Latest build
+          body: Automatically built from the latest commit on main. Not a stable/versioned release.
+          artifacts: app/build/outputs/apk/debug/app-debug.apk
+          allowUpdates: true
+          replacesArtifacts: true
+          prerelease: true
