@@ -35,16 +35,16 @@ jobs:
           name: ownscreen-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      # A single rolling "latest" release, overwritten on every push to main — gives a stable,
-      # permanent URL that always has the current build:
-      # https://github.com/<owner>/<repo>/releases/download/latest/app-debug.apk
-      - name: Publish to "latest" release
+      # Each push gets its own tag/release (rather than overwriting one shared "latest" release)
+      # so update checkers like Obtainium — which detect new versions by tag, not by inspecting
+      # the APK — actually see a new version on every build. GitHub's own generated
+      # ".../releases/latest/download/app-debug.apk" URL still always resolves to whichever
+      # release is newest, so this doesn't lose the stable permanent-download-link use case.
+      - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-          tag: latest
-          name: Latest build
-          body: Automatically built from the latest commit on main. Not a stable/versioned release.
+          tag: v1.0.${{ github.run_number }}
+          name: v1.0.${{ github.run_number }}
+          body: Automatically built from ${{ github.sha }} on main. Not a stable/hand-versioned release.
           artifacts: app/build/outputs/apk/debug/app-debug.apk
-          allowUpdates: true
-          replacesArtifacts: true
           prerelease: false
