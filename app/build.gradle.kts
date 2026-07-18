@@ -20,6 +20,20 @@ android {
         versionName = (project.findProperty("appVersionName") as String?) ?: "1.0"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // Committed keystore (not the AGP-generated one) so every build — local or CI —
+            // signs with the same key. Without this, a fresh CI runner would auto-generate a
+            // new ~/.android/debug.keystore each run, giving every release a different
+            // signature and breaking in-place updates (Obtainium/Android reject cross-signature
+            // installs as a version conflict) even though versionCode keeps increasing.
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
