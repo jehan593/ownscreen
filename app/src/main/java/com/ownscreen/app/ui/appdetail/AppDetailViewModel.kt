@@ -113,8 +113,17 @@ class AppDetailViewModel(
      *  when canBlock is true. */
     fun block() {
         viewModelScope.launch {
+            // Baseline must be fetched fresh here, not read from uiState.usedMinutes: that field
+            // only reflects the last poll tick (up to POLL_INTERVAL_MILLIS stale, or still its
+            // 0 default if the screen just opened). checkBlockLikelyIneffective() compares this
+            // baseline against a *fresh* reading taken right after — an outdated-but-lower
+            // baseline reads as "usage kept accumulating," falsely flagging a block that actually
+            // worked as ineffective.
+            val freshMinutes = UsageStatsRepository.millisToMinutes(
+                usageStatsRepository.computeTodayUsageMillis()[packageName] ?: 0L
+            )
             ownDroidController.suspend(packageName)
-            suspendStateRepository.markSuspended(packageName, _uiState.value.usedMinutes)
+            suspendStateRepository.markSuspended(packageName, freshMinutes)
             refreshUsageAndBlockStatus()
         }
     }
