@@ -14,6 +14,8 @@ import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
@@ -29,15 +31,17 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import com.ownscreen.app.MainActivity
 import com.ownscreen.app.OwnScreenApplication
 import com.ownscreen.app.data.usage.UsageStatsRepository
 import com.ownscreen.app.ui.theme.nord0
 import com.ownscreen.app.ui.theme.nord4
 import com.ownscreen.app.ui.theme.nord6
 import com.ownscreen.app.ui.theme.nord8
+import com.ownscreen.app.util.AppColorUtils
 import com.ownscreen.app.util.TimeUtils
 
-private data class WidgetAppRow(val label: String, val minutes: Int, val icon: Bitmap)
+private data class WidgetAppRow(val label: String, val minutes: Int, val dot: Bitmap)
 
 /**
  * Glance widgets render through RemoteViews in the launcher's own process, where custom
@@ -65,10 +69,12 @@ class ScreenTimeWidget : GlanceAppWidget() {
         val topApps = usageMillis.entries
             .mapNotNull { (pkg, ms) ->
                 appsByPackage[pkg]?.let { app ->
+                    val iconBitmap = app.icon.toBitmap(width = 96, height = 96)
+                    val accent = AppColorUtils.nordAccentFor(iconBitmap)
                     WidgetAppRow(
                         label = app.label,
                         minutes = UsageStatsRepository.millisToMinutes(ms),
-                        icon = app.icon.toBitmap(width = 96, height = 96)
+                        dot = AppColorUtils.dotBitmap(accent, sizePx = 96)
                     )
                 }
             }
@@ -101,6 +107,7 @@ private fun WidgetContent(totalMinutes: Int, topApps: List<WidgetAppRow>) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(nord0)
+            .clickable(actionStartActivity<MainActivity>())
             .padding(12.dp),
         verticalAlignment = if (compact) Alignment.Vertical.CenterVertically else Alignment.Vertical.Top
     ) {
@@ -127,11 +134,11 @@ private fun WidgetContent(totalMinutes: Int, topApps: List<WidgetAppRow>) {
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     Image(
-                        provider = ImageProvider(app.icon),
+                        provider = ImageProvider(app.dot),
                         contentDescription = null,
-                        modifier = GlanceModifier.width(22.dp).height(22.dp)
+                        modifier = GlanceModifier.width(12.dp).height(12.dp)
                     )
-                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Spacer(modifier = GlanceModifier.width(10.dp))
                     Column {
                         Text(
                             text = app.label,
