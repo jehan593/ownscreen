@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,6 +30,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ownscreen.app.ui.components.AppIcon
 import com.ownscreen.app.ui.rememberAppContainer
+import com.ownscreen.app.ui.theme.nord11
 import com.ownscreen.app.util.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +40,12 @@ fun HistoryDayScreen(epochDay: Long, onBack: () -> Unit) {
     val viewModel: HistoryDayViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                HistoryDayViewModel(epochDay, container.usageHistoryRepository, container.installedAppsRepository)
+                HistoryDayViewModel(
+                    epochDay,
+                    container.usageHistoryRepository,
+                    container.installedAppsRepository,
+                    container.suspendStateRepository
+                )
             }
         }
     )
@@ -79,6 +87,14 @@ fun HistoryDayScreen(epochDay: Long, onBack: () -> Unit) {
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(start = 12.dp).weight(1f)
                         )
+                        if (app.isSuspended) {
+                            Icon(
+                                imageVector = Icons.Filled.Lock,
+                                contentDescription = "Blocked",
+                                tint = nord11,
+                                modifier = Modifier.padding(end = 8.dp).width(14.dp)
+                            )
+                        }
                         Text(text = TimeUtils.formatHoursMinutes(app.usedMinutes), style = MaterialTheme.typography.bodyMedium)
                     }
                     HorizontalDivider()

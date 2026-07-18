@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownscreen.app.data.pm.InstalledAppsRepository
+import com.ownscreen.app.data.repository.AppSuspendStateRepository
 import com.ownscreen.app.data.repository.UsageHistoryRepository
 import com.ownscreen.app.util.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,8 @@ data class HistoryDayAppRow(
     val packageName: String,
     val label: String,
     val icon: Drawable,
-    val usedMinutes: Int
+    val usedMinutes: Int,
+    val isSuspended: Boolean
 )
 
 data class HistoryDayUiState(
@@ -28,7 +30,8 @@ data class HistoryDayUiState(
 class HistoryDayViewModel(
     private val epochDay: Long,
     private val usageHistoryRepository: UsageHistoryRepository,
-    private val installedAppsRepository: InstalledAppsRepository
+    private val installedAppsRepository: InstalledAppsRepository,
+    private val suspendStateRepository: AppSuspendStateRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryDayUiState(dayLabel = TimeUtils.formatDayLabel(epochDay)))
@@ -38,6 +41,7 @@ class HistoryDayViewModel(
         viewModelScope.launch {
             val snapshots = usageHistoryRepository.getDay(epochDay)
             val appsByPackage = installedAppsRepository.getLaunchableApps().associateBy { it.packageName }
+            val suspendedPackages = suspendStateRepository.getSuspendedPackages()
 
             val rows = snapshots
                 .mapNotNull { snapshot ->
@@ -46,7 +50,8 @@ class HistoryDayViewModel(
                         packageName = snapshot.packageName,
                         label = app.label,
                         icon = app.icon,
-                        usedMinutes = snapshot.minutesUsed
+                        usedMinutes = snapshot.minutesUsed,
+                        isSuspended = snapshot.packageName in suspendedPackages
                     )
                 }
                 .sortedByDescending { it.usedMinutes }

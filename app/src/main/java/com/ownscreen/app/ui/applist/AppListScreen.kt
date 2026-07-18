@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -34,6 +36,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ownscreen.app.ui.components.AppIcon
 import com.ownscreen.app.ui.rememberAppContainer
+import com.ownscreen.app.ui.theme.nord11
 
 /**
  * A dedicated screen (not a section buried in Settings) so the search field can sit right below
@@ -46,7 +49,7 @@ fun AppListScreen(onBack: () -> Unit, onOpenAppDetail: (String) -> Unit) {
     val container = rememberAppContainer()
     val viewModel: AppListViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { AppListViewModel(container.installedAppsRepository) }
+            initializer { AppListViewModel(container.installedAppsRepository, container.suspendStateRepository) }
         }
     )
     val uiState by viewModel.uiState.collectAsState()
@@ -94,6 +97,14 @@ fun AppListScreen(onBack: () -> Unit, onOpenAppDetail: (String) -> Unit) {
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 12.dp).weight(1f)
                         )
+                        if (app.isSuspended) {
+                            Icon(
+                                imageVector = Icons.Filled.Lock,
+                                contentDescription = "Blocked",
+                                tint = nord11,
+                                modifier = Modifier.padding(end = 8.dp).width(14.dp)
+                            )
+                        }
                         TextButton(onClick = { onOpenAppDetail(app.packageName) }) {
                             Text("Manage")
                         }
