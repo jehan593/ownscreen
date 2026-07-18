@@ -13,8 +13,11 @@ android {
         applicationId = "com.ownscreen.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        // Overridable via -PappVersionCode=/-PappVersionName= (CI bumps these per build so
+        // update checkers like Obtainium, which key off versionCode, see each build as new);
+        // local/default builds fall back to a static version.
+        versionCode = (project.findProperty("appVersionCode") as String?)?.toIntOrNull() ?: 1
+        versionName = (project.findProperty("appVersionName") as String?) ?: "1.0"
     }
 
     buildTypes {

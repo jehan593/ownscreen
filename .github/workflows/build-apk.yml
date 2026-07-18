@@ -23,8 +23,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # versionCode must strictly increase for update checkers (Obtainium, Android itself) to
+      # recognize a new build; run_number does that automatically across pushes to this repo.
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug -PappVersionCode=${{ github.run_number }} -PappVersionName=1.0.${{ github.run_number }}
 
       # Downloadable from the Actions tab for this specific run (kept for ~90 days).
       - name: Upload build artifact
@@ -45,4 +47,4 @@ jobs:
           artifacts: app/build/outputs/apk/debug/app-debug.apk
           allowUpdates: true
           replacesArtifacts: true
-          prerelease: true
+          prerelease: false
