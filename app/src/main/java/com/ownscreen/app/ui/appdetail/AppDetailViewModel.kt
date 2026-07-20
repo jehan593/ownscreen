@@ -31,6 +31,7 @@ data class AppDetailUiState(
 
 class AppDetailViewModel(
     private val packageName: String,
+    initialMinutes: Int = -1,
     private val usageStatsRepository: UsageStatsRepository,
     private val installedAppsRepository: InstalledAppsRepository,
     private val suspendStateRepository: AppSuspendStateRepository,
@@ -40,11 +41,25 @@ class AppDetailViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        AppDetailUiState(ownDroidInstalled = ownDroidController.isOwnDroidInstalled())
+        AppDetailUiState(
+            // Caller (e.g. Dashboard) may already know today's usage and pass it through nav args
+            // so this screen doesn't render "0m" for the frames before its own fetch completes.
+            // -1 means "unknown" (e.g. opened from AppListScreen) — fall back to 0 same as before.
+            usedMinutes = initialMinutes.coerceAtLeast(0),
+            ownDroidInstalled = ownDroidController.isOwnDroidInstalled()
+        )
     )
     val uiState: StateFlow<AppDetailUiState> = _uiState.asStateFlow()
 
     init {
+        // Fetch immediately at ViewModel construction rather than waiting for
+        // LifecycleAwarePoll's first tick (which is gated behind the screen's composition
+        // reaching RESUMED) — this closes the window during which a stale/absent initialMinutes
+        // value would otherwise sit on screen.
+        viewModelScope.launch {
+            refreshUsageAndBlockStatus()
+        }
+
         viewModelScope.launch {
             val app = installedAppsRepository.getLaunchableApps().find { it.packageName == packageName }
             _uiState.value = _uiState.value.copy(label = app?.label ?: packageName, icon = app?.icon)

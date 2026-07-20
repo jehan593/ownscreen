@@ -37,13 +37,14 @@ import com.ownscreen.app.util.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppDetailScreen(packageName: String, onBack: () -> Unit) {
+fun AppDetailScreen(packageName: String, initialMinutes: Int = -1, onBack: () -> Unit) {
     val container = rememberAppContainer()
     val viewModel: AppDetailViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
                 AppDetailViewModel(
                     packageName,
+                    initialMinutes,
                     container.usageStatsRepository,
                     container.installedAppsRepository,
                     container.suspendStateRepository,

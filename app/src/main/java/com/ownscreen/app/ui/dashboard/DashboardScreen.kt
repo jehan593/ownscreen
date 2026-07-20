@@ -38,7 +38,7 @@ import com.ownscreen.app.util.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(onOpenSettings: () -> Unit, onOpenAppDetail: (String) -> Unit, onOpenHistory: () -> Unit) {
+fun DashboardScreen(onOpenSettings: () -> Unit, onOpenAppDetail: (String, Int) -> Unit, onOpenHistory: () -> Unit) {
     val context = LocalContext.current
     val container = rememberAppContainer()
 
@@ -89,7 +89,7 @@ fun DashboardScreen(onOpenSettings: () -> Unit, onOpenAppDetail: (String) -> Uni
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(uiState.apps, key = { it.packageName }) { app ->
-                    AppUsageRow(app = app, onClick = { onOpenAppDetail(app.packageName) })
+                    AppUsageRow(app = app, onClick = { onOpenAppDetail(app.packageName, app.usedMinutes) })
                     HorizontalDivider()
                 }
             }
