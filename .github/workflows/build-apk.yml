@@ -36,6 +36,17 @@ jobs:
           name: ownscreen-release-apk
           path: app/build/outputs/apk/release/app-release.apk
 
+      # Release body is the HEAD commit's message at dispatch time, so release notes describe
+      # what actually changed instead of a generic "automatically built" placeholder.
+      - name: Get commit message
+        id: commit_message
+        run: |
+          {
+            echo 'message<<EOF'
+            git log -1 --pretty=%B ${{ github.sha }}
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
       # Each push gets its own tag/release (rather than overwriting one shared "latest" release)
       # so update checkers like Obtainium — which detect new versions by tag, not by inspecting
       # the APK — actually see a new version on every build. GitHub's own generated
@@ -46,6 +57,6 @@ jobs:
         with:
           tag: v1.0.${{ github.run_number }}
           name: v1.0.${{ github.run_number }}
-          body: Automatically built from ${{ github.sha }} on main. Not a stable/hand-versioned release.
+          body: ${{ steps.commit_message.outputs.message }}
           artifacts: app/build/outputs/apk/release/app-release.apk
           prerelease: false
