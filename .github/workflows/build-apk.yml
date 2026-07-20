@@ -23,20 +23,23 @@ jobs:
 
       # versionCode must strictly increase for update checkers (Obtainium, Android itself) to
       # recognize a new build; run_number does that automatically across pushes to this repo.
-      - name: Build debug APK
-        run: ./gradlew assembleDebug -PappVersionCode=${{ github.run_number }} -PappVersionName=1.0.${{ github.run_number }}
+      # Release (not debug) is what's shipped — it's R8-minified and resource-shrunk, and reuses
+      # the same pinned debug.keystore signing key (see app/build.gradle.kts) so in-place updates
+      # still work.
+      - name: Build release APK
+        run: ./gradlew assembleRelease -PappVersionCode=${{ github.run_number }} -PappVersionName=1.0.${{ github.run_number }}
 
       # Downloadable from the Actions tab for this specific run (kept for ~90 days).
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ownscreen-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: ownscreen-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
 
       # Each push gets its own tag/release (rather than overwriting one shared "latest" release)
       # so update checkers like Obtainium — which detect new versions by tag, not by inspecting
       # the APK — actually see a new version on every build. GitHub's own generated
-      # ".../releases/latest/download/app-debug.apk" URL still always resolves to whichever
+      # ".../releases/latest/download/app-release.apk" URL still always resolves to whichever
       # release is newest, so this doesn't lose the stable permanent-download-link use case.
       - name: Publish release
         uses: ncipollo/release-action@v1
@@ -44,5 +47,5 @@ jobs:
           tag: v1.0.${{ github.run_number }}
           name: v1.0.${{ github.run_number }}
           body: Automatically built from ${{ github.sha }} on main. Not a stable/hand-versioned release.
-          artifacts: app/build/outputs/apk/debug/app-debug.apk
+          artifacts: app/build/outputs/apk/release/app-release.apk
           prerelease: false

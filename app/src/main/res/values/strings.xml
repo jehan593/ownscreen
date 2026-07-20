@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">OwnScreen</string>
     <string name="notification_tracking_title">OwnScreen is tracking usage</string>
+    <string name="widget_subtitle">Screen time today</string>
 </resources>

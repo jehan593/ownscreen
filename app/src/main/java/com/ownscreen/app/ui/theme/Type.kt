@@ -8,8 +8,7 @@ import com.ownscreen.app.R
 
 val MartianMono = FontFamily(
     Font(R.font.martian_mono_regular, FontWeight.Normal),
-    Font(R.font.martian_mono_medium, FontWeight.Medium),
-    Font(R.font.martian_mono_bold, FontWeight.Bold)
+    Font(R.font.martian_mono_medium, FontWeight.Medium)
 )
 
 private val defaultTypography = Typography()

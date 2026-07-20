@@ -65,7 +65,11 @@
         </receiver>
 
         <receiver
-            android:name=".widget.ScreenTimeWidgetReceiver"
+            android:name=".widget.WidgetRefreshAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".widget.ScreenTimeWidgetProvider"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

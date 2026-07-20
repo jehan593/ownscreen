@@ -2,4 +2,13 @@
 <resources>
     <!-- Nord Polar Night nord0 -->
     <color name="ic_launcher_background">#2E3440</color>
+
+    <!-- Widget colors: RemoteViews inflates in the launcher's process, so these are plain XML
+         color resources rather than the Compose Color constants in ui/theme/Color.kt. Values are
+         the same Nord palette (nord0/nord4/nord6/nord8). -->
+    <color name="widget_bg">#2E3440</color>
+    <color name="widget_subtitle">#88C0D0</color>
+    <color name="widget_total">#ECEFF4</color>
+    <color name="widget_label">#D8DEE9</color>
+    <color name="widget_time">#88C0D0</color>
 </resources>

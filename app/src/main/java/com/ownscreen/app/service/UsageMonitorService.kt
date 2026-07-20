@@ -12,15 +12,13 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.updateAll
 import com.ownscreen.app.MainActivity
 import com.ownscreen.app.OwnScreenApplication
 import com.ownscreen.app.R
 import com.ownscreen.app.data.db.entity.DailyUsageSnapshotEntity
 import com.ownscreen.app.data.usage.UsageStatsRepository
 import com.ownscreen.app.util.TimeUtils
-import com.ownscreen.app.widget.ScreenTimeWidget
+import com.ownscreen.app.widget.ScreenTimeWidgetProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -101,10 +99,7 @@ class UsageMonitorService : Service() {
             }
         )
 
-        val glanceIds = GlanceAppWidgetManager(applicationContext).getGlanceIds(ScreenTimeWidget::class.java)
-        if (glanceIds.isNotEmpty()) {
-            ScreenTimeWidget().updateAll(applicationContext)
-        }
+        ScreenTimeWidgetProvider.requestUpdate(applicationContext)
     }
 
     override fun onDestroy() {

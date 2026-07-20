@@ -3,7 +3,7 @@ package com.ownscreen.app
 import android.app.Application
 import com.ownscreen.app.di.AppContainer
 import com.ownscreen.app.di.DefaultAppContainer
-import com.ownscreen.app.widget.WidgetUpdateWorker
+import com.ownscreen.app.widget.WidgetRefreshAlarmReceiver
 
 class OwnScreenApplication : Application() {
     lateinit var container: AppContainer
@@ -12,6 +12,6 @@ class OwnScreenApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = DefaultAppContainer(this)
-        WidgetUpdateWorker.schedule(this)
+        WidgetRefreshAlarmReceiver.schedule(this)
     }
 }

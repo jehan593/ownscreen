@@ -88,7 +88,7 @@ object AppColorUtils {
         return dr * dr + dg * dg + db * db
     }
 
-    /** Renders a solid-filled circle bitmap for use as a Glance [androidx.glance.Image]. */
+    /** Renders a solid-filled circle bitmap for use in a widget's [android.widget.ImageView] row dot. */
     fun dotBitmap(color: Color, sizePx: Int): Bitmap {
         val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)

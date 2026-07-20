@@ -22,7 +22,7 @@ happen entirely on-device.
   calculator for either) that has to be solved correctly first. A wrong answer swaps in a new
   problem rather than letting you keep guessing the same one.
 - **Widget**: shows today's total and top apps, refreshed by the same service tick (with a
-  30-minute WorkManager fallback in case an aggressive OEM battery manager kills the service).
+  30-minute AlarmManager fallback in case an aggressive OEM battery manager kills the service).
 
 ## One-time setup (required before blocking works)
 
@@ -50,9 +50,14 @@ won't be there to act on it) — a banner in Settings flags this.
 
 ## Building
 
-This has actually been built and verified: `./gradlew assembleDebug` succeeds and produces
-`app/build/outputs/apk/debug/app-debug.apk`. The Gradle wrapper (`gradlew`, `gradlew.bat`,
+This has actually been built and verified: both `./gradlew assembleDebug` and
+`./gradlew assembleRelease` succeed. The Gradle wrapper (`gradlew`, `gradlew.bat`,
 `gradle/wrapper/gradle-wrapper.jar`) is included and working, so no regeneration step is needed.
+
+CI and any distributed build ship **release** (`app/build/outputs/apk/release/app-release.apk`) —
+R8-minified and resource-shrunk, signed with the same committed `debug.keystore` as the debug
+build (see `app/build.gradle.kts`) so in-place updates via Obtainium keep working. Use
+`assembleDebug` (`app/build/outputs/apk/debug/app-debug.apk`) for local iteration only.
 
 1. Open this `ownscreen/` folder in Android Studio (it will pick up the existing wrapper and
    sync automatically), **or** from a terminal with JDK 17 and the Android SDK installed:
@@ -60,21 +65,21 @@ This has actually been built and verified: `./gradlew assembleDebug` succeeds an
    # local.properties needs sdk.dir pointed at your Android SDK if Android Studio hasn't
    # already created one for you, e.g.:
    echo "sdk.dir=/path/to/Android/sdk" > local.properties
-   ./gradlew assembleDebug
+   ./gradlew assembleRelease
    ```
 2. Install/run on a device or emulator running Android 8.0 (API 26) or newer:
-   `adb install app/build/outputs/apk/debug/app-debug.apk`. OwnDroid/device-owner setup only
+   `adb install app/build/outputs/apk/release/app-release.apk`. OwnDroid/device-owner setup only
    really makes sense on a physical device you control — not required just to try the
    tracking/dashboard/widget UI.
 
 ### Fonts
 
-Martian Mono Nerd Font (`.ttf`, Regular/Medium/Bold) is already bundled under
-`app/src/main/res/font/`, sourced from the
-[Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) project releases (license in
-`MARTIAN_MONO_LICENSE.txt` at the project root). Home-screen widget text falls back to the system
-monospace font — Glance/RemoteViews custom-font support is inconsistent across launchers, so the
-in-app screens are where you'll see the real Martian Mono.
+Martian Mono Nerd Font (`.ttf`, Regular + Medium — Bold isn't used anywhere and was dropped) is
+bundled under `app/src/main/res/font/`, Latin-subsetted from the full
+[Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) release down to just the glyphs the app
+actually renders (license in `MARTIAN_MONO_LICENSE.txt` at the project root). Home-screen widget
+text falls back to the system monospace font — RemoteViews custom-font support is inconsistent
+across launchers, so the in-app screens are where you'll see the real Martian Mono.
 
 ## Permissions
 
