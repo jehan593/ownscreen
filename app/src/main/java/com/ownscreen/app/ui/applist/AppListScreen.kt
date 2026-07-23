@@ -1,5 +1,6 @@
 package com.ownscreen.app.ui.applist
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -88,6 +88,7 @@ fun AppListScreen(onBack: () -> Unit, onOpenAppDetail: (String) -> Unit) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable { onOpenAppDetail(app.packageName) }
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -104,9 +105,6 @@ fun AppListScreen(onBack: () -> Unit, onOpenAppDetail: (String) -> Unit) {
                                 tint = nord11,
                                 modifier = Modifier.padding(end = 8.dp).width(14.dp)
                             )
-                        }
-                        TextButton(onClick = { onOpenAppDetail(app.packageName) }) {
-                            Text("Manage")
                         }
                     }
                     HorizontalDivider()
