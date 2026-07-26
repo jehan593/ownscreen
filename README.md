@@ -77,7 +77,8 @@ build (see `app/build.gradle.kts`) so in-place updates via Obtainium keep workin
 Martian Mono Nerd Font (`.ttf`, Regular + Medium — Bold isn't used anywhere and was dropped) is
 bundled under `app/src/main/res/font/`, Latin-subsetted from the full
 [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) release down to just the glyphs the app
-actually renders (license in `MARTIAN_MONO_LICENSE.txt` at the project root). Home-screen widget
+actually renders (license in `app/src/main/res/font/MARTIAN_MONO_LICENSE.txt`, covering only the
+font — it is not the license for OwnScreen's own source code). Home-screen widget
 text falls back to the system monospace font — RemoteViews custom-font support is inconsistent
 across launchers, so the in-app screens are where you'll see the real Martian Mono.
 
