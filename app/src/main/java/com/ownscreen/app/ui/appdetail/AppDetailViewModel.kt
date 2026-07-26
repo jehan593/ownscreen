@@ -3,6 +3,7 @@ package com.ownscreen.app.ui.appdetail
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ownscreen.app.data.db.entity.AppSuspendStateEntity
 import com.ownscreen.app.data.pm.InstalledAppsRepository
 import com.ownscreen.app.data.pm.PackageSuspensionChecker
 import com.ownscreen.app.data.repository.AppSuspendStateRepository
@@ -86,13 +87,22 @@ class AppDetailViewModel(
     /** Called by the screen's lifecycle-aware poll loop (see LifecycleAwarePoll) — only runs
      *  while this screen is actually visible, not for the ViewModel's whole lifetime. Also called
      *  immediately after block()/unblock() so the UI reflects the action right away instead of
-     *  waiting for the next scheduled tick. */
+     *  waiting for the next scheduled tick.
+     *
+     *  isSuspended is re-read directly from the DB here too, not left to the observeAllSuspended
+     *  Flow collector alone: that collector only updates isSuspended on its *own* emissions, so if
+     *  its very first emission at ViewModel construction is ever missed or delayed (it's racing
+     *  several other queries launched in init at once), isSuspended would otherwise stay stuck at
+     *  its stale default until some unrelated write to the table forced a fresh invalidation. This
+     *  poll-driven read makes it self-correct within one tick regardless. */
     suspend fun refreshUsageAndBlockStatus() {
         val usageMillis = usageStatsRepository.computeTodayUsageMillis()[packageName] ?: 0L
         val minutes = UsageStatsRepository.millisToMinutes(usageMillis)
+        val state = suspendStateRepository.get(packageName)
         _uiState.value = _uiState.value.copy(
             usedMinutes = minutes,
-            blockLikelyIneffective = checkBlockLikelyIneffective(minutes)
+            isSuspended = state?.isSuspended ?: false,
+            blockLikelyIneffective = checkBlockLikelyIneffective(minutes, state)
         )
     }
 
@@ -109,9 +119,11 @@ class AppDetailViewModel(
      *    all, so if it keeps accumulating *new* usage well past a grace period after being
      *    blocked, that's strong indirect evidence the block isn't actually in effect.
      */
-    private suspend fun checkBlockLikelyIneffective(currentMinutes: Int): Boolean {
-        val state = suspendStateRepository.get(packageName) ?: return false
-        if (!state.isSuspended) return false
+    private suspend fun checkBlockLikelyIneffective(
+        currentMinutes: Int,
+        state: AppSuspendStateEntity?
+    ): Boolean {
+        if (state == null || !state.isSuspended) return false
 
         packageSuspensionChecker.isSuspendedOrNull(packageName)?.let { osSuspended ->
             val elapsedSinceBlock = System.currentTimeMillis() - state.lastChangedAtEpochMillis
