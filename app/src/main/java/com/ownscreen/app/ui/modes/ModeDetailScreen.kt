@@ -58,7 +58,6 @@ fun ModeDetailScreen(modeId: Long, onBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
     // Solving this once unlocks the rest of this screen visit — re-opening the screen later
     // (a fresh composition) asks again, since it's re-derived from uiState.originalRequireTrivia
     // each time rather than persisted anywhere.
@@ -74,24 +73,19 @@ fun ModeDetailScreen(modeId: Long, onBack: () -> Unit) {
         }
     }
 
+    fun doDelete() {
+        coroutineScope.launch {
+            viewModel.delete()
+            onBack()
+        }
+    }
+
     // Gates opening the editor itself, not saving — solving it once at entry unlocks the rest of
     // this screen visit. Only applies to an existing mode that already had the flag on; a brand
-    // new mode has nothing to protect yet.
+    // new mode has nothing to protect yet. Delete lives behind this same gate (see the delete
+    // IconButton below) rather than having its own trivia challenge, since reaching the delete
+    // button already required solving it.
     val needsEntryChallenge = !uiState.isLoading && uiState.originalRequireTrivia && !entryChallengeSolved
-
-    if (showDeleteConfirm) {
-        MathChallengeDialog(
-            title = "Solve to delete mode",
-            onSolved = {
-                showDeleteConfirm = false
-                coroutineScope.launch {
-                    viewModel.delete()
-                    onBack()
-                }
-            },
-            onDismiss = { showDeleteConfirm = false }
-        )
-    }
 
     if (needsEntryChallenge) {
         MathChallengeDialog(
@@ -112,7 +106,7 @@ fun ModeDetailScreen(modeId: Long, onBack: () -> Unit) {
                 },
                 actions = {
                     if (!uiState.isNew && !needsEntryChallenge) {
-                        IconButton(onClick = { showDeleteConfirm = true }) {
+                        IconButton(onClick = { doDelete() }) {
                             Icon(Icons.Filled.Delete, contentDescription = "Delete mode")
                         }
                     }

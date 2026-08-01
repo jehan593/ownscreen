@@ -45,9 +45,10 @@ import com.ownscreen.app.ui.theme.nord11
  * Lists every Mode with the currently active one marked. Tapping an inactive mode's row
  * activates it directly, unless the currently active mode has its "require trivia" flag set (see
  * [ModeDetailScreen]), in which case switching away from it is gated behind a math challenge
- * first. The edit icon opens [ModeDetailScreen] to rename a mode / change its app set without
- * switching to it; the Default mode has no edit affordance since it always has an empty, fixed
- * app set and can never require trivia.
+ * first; the active mode's own row is not clickable. The edit icon (pencil) is the only way to
+ * open [ModeDetailScreen] to rename a mode / change its app set, whether or not it's currently
+ * active; the Default mode has no edit affordance since it always has an empty, fixed app set and
+ * can never require trivia.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,12 +97,10 @@ fun ModesScreen(onBack: () -> Unit, onOpenModeDetail: (Long) -> Unit, onCreateMo
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            if (!isActive) {
+                        .let { base ->
+                            if (isActive) base else base.clickable {
                                 if (activeMode?.requireTrivia == true) pendingActivation = mode.id
                                 else viewModel.activateMode(mode.id)
-                            } else if (!mode.isDefault) {
-                                onOpenModeDetail(mode.id)
                             }
                         }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
