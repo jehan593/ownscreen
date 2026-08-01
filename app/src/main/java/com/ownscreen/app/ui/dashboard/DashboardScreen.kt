@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +39,12 @@ import com.ownscreen.app.util.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(onOpenSettings: () -> Unit, onOpenAppDetail: (String, Int) -> Unit, onOpenHistory: () -> Unit) {
+fun DashboardScreen(
+    onOpenSettings: () -> Unit,
+    onOpenAppDetail: (String, Int) -> Unit,
+    onOpenHistory: () -> Unit,
+    onOpenModes: () -> Unit
+) {
     val context = LocalContext.current
     val container = rememberAppContainer()
 
@@ -63,6 +69,9 @@ fun DashboardScreen(onOpenSettings: () -> Unit, onOpenAppDetail: (String, Int) -
             TopAppBar(
                 title = { Text("OwnScreen") },
                 actions = {
+                    IconButton(onClick = onOpenModes) {
+                        Icon(Icons.Filled.List, contentDescription = "Modes")
+                    }
                     IconButton(onClick = onOpenHistory) {
                         Icon(Icons.Filled.DateRange, contentDescription = "History")
                     }

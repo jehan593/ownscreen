@@ -7,6 +7,7 @@ import com.ownscreen.app.data.db.AppDatabase
 import com.ownscreen.app.data.pm.InstalledAppsRepository
 import com.ownscreen.app.data.pm.PackageSuspensionChecker
 import com.ownscreen.app.data.repository.AppSuspendStateRepository
+import com.ownscreen.app.data.repository.ModeRepository
 import com.ownscreen.app.data.repository.SettingsRepository
 import com.ownscreen.app.data.repository.UsageHistoryRepository
 import com.ownscreen.app.data.usage.UsageStatsRepository
@@ -25,15 +26,18 @@ interface AppContainer {
     val ownDroidController: OwnDroidController
     val installedAppsRepository: InstalledAppsRepository
     val packageSuspensionChecker: PackageSuspensionChecker
+    val modeRepository: ModeRepository
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val database: AppDatabase by lazy {
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
-            // No real migrations written for any past version bump (see AppDatabase's version
-            // history comment) — acceptable for this local-only data (usage snapshots/block
-            // state), so just recreate the DB on a schema mismatch rather than crash.
+            .addMigrations(AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
+            .addCallback(AppDatabase.CALLBACK)
+            // No real migrations written for version bumps before v5 (see AppDatabase's version
+            // history comment) — acceptable for this local-only data (usage snapshots), so just
+            // recreate the DB on any other schema mismatch rather than crash.
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -64,5 +68,15 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val packageSuspensionChecker: PackageSuspensionChecker by lazy {
         PackageSuspensionChecker(context.packageManager)
+    }
+
+    override val modeRepository: ModeRepository by lazy {
+        ModeRepository(
+            database.modeDao(),
+            suspendStateRepository,
+            settingsRepository,
+            ownDroidController,
+            usageStatsRepository
+        )
     }
 }

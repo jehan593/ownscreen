@@ -4,7 +4,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.ownscreen.app.data.db.entity.ModeEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -23,6 +25,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     companion object {
         val OWNDROID_API_KEY = stringPreferencesKey("owndroid_api_key")
         val POLL_INTERVAL_SECONDS = intPreferencesKey("poll_interval_seconds")
+        val ACTIVE_MODE_ID = longPreferencesKey("active_mode_id")
         const val DEFAULT_POLL_INTERVAL_SECONDS = 30
     }
 
@@ -30,11 +33,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val pollIntervalSecondsFlow: Flow<Int> =
         dataStore.data.map { it[POLL_INTERVAL_SECONDS] ?: DEFAULT_POLL_INTERVAL_SECONDS }
 
+    /** Which Mode is currently active — this is "what's selected right now" device state, not
+     *  data about the mode itself, so it lives here rather than in the `mode` table. */
+    val activeModeIdFlow: Flow<Long> =
+        dataStore.data.map { it[ACTIVE_MODE_ID] ?: ModeEntity.DEFAULT_MODE_ID }
+
     suspend fun setApiKey(key: String) {
         dataStore.edit { it[OWNDROID_API_KEY] = key }
     }
 
     suspend fun setPollIntervalSeconds(seconds: Int) {
         dataStore.edit { it[POLL_INTERVAL_SECONDS] = seconds.coerceIn(15, 300) }
+    }
+
+    suspend fun setActiveModeId(modeId: Long) {
+        dataStore.edit { it[ACTIVE_MODE_ID] = modeId }
     }
 }

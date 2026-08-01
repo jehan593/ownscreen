@@ -14,5 +14,9 @@ data class AppSuspendStateEntity(
      *  (real suspension would prevent it from launching at all), that's evidence the block isn't
      *  really in effect — e.g. a wrong OwnDroid API key. */
     val usageMinutesAtBlockTime: Int,
-    val lastChangedAtEpochMillis: Long
+    val lastChangedAtEpochMillis: Long,
+    /** Non-null when this suspension was caused by activating a Mode (see ModeRepository) —
+     *  mode switches are only allowed to unsuspend rows they own. Null means either not suspended
+     *  or a manual block made from App Detail directly, which mode switching never touches. */
+    val blockedByModeId: Long? = null
 )

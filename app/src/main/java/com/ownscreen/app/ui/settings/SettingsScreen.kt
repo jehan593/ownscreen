@@ -42,7 +42,7 @@ import com.ownscreen.app.ui.rememberUsageAccessGranted
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit, onOpenAppList: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onOpenAppList: () -> Unit, onOpenModes: () -> Unit) {
     val context = LocalContext.current
     val container = rememberAppContainer()
     val viewModel: SettingsViewModel = viewModel(
@@ -180,6 +180,12 @@ fun SettingsScreen(onBack: () -> Unit, onOpenAppList: () -> Unit) {
 
             OutlinedButton(onClick = onOpenAppList, modifier = Modifier.fillMaxWidth()) {
                 Text("All apps")
+            }
+
+            Spacer(gap)
+
+            OutlinedButton(onClick = onOpenModes, modifier = Modifier.fillMaxWidth()) {
+                Text("Modes")
             }
         }
     }

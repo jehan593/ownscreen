@@ -23,14 +23,14 @@ import com.ownscreen.app.util.MathChallenge
  * just keep guessing the same problem.
  */
 @Composable
-fun MathChallengeDialog(onSolved: () -> Unit, onDismiss: () -> Unit) {
+fun MathChallengeDialog(onSolved: () -> Unit, onDismiss: () -> Unit, title: String = "Solve to unblock") {
     var challenge by remember { mutableStateOf(MathChallenge.random()) }
     var input by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Solve to unblock") },
+        title = { Text(title) },
         text = {
             Column {
                 Text("What is ${challenge.question}?", style = MaterialTheme.typography.titleMedium)

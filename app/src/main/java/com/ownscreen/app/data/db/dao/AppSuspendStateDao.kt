@@ -17,6 +17,9 @@ interface AppSuspendStateDao {
     @Query("SELECT * FROM app_suspend_state WHERE packageName = :packageName")
     suspend fun get(packageName: String): AppSuspendStateEntity?
 
+    @Query("SELECT * FROM app_suspend_state WHERE isSuspended = 1 AND blockedByModeId = :modeId")
+    suspend fun getBlockedByMode(modeId: Long): List<AppSuspendStateEntity>
+
     @Upsert
     suspend fun upsert(entity: AppSuspendStateEntity)
 }

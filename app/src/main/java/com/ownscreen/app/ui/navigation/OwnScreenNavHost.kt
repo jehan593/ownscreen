@@ -16,6 +16,9 @@ import com.ownscreen.app.ui.applist.AppListScreen
 import com.ownscreen.app.ui.dashboard.DashboardScreen
 import com.ownscreen.app.ui.history.HistoryDayScreen
 import com.ownscreen.app.ui.history.HistoryScreen
+import com.ownscreen.app.ui.modes.ModeDetailScreen
+import com.ownscreen.app.ui.modes.ModeDetailViewModel
+import com.ownscreen.app.ui.modes.ModesScreen
 import com.ownscreen.app.ui.settings.SettingsScreen
 
 private object Routes {
@@ -25,12 +28,16 @@ private object Routes {
     const val APP_LIST = "app_list"
     const val HISTORY = "history"
     const val HISTORY_DAY = "history_day/{epochDay}"
+    const val MODES = "modes"
+    const val MODE_DETAIL = "mode_detail/{modeId}"
 
     // initialMinutes lets a caller that already knows today's usage (e.g. Dashboard, which just
     // fetched it) pass it straight through instead of AppDetailScreen showing "0m" while it
     // re-queries UsageStatsManager from scratch. -1 means "unknown" (e.g. from AppListScreen).
     fun appDetail(packageName: String, initialMinutes: Int = -1) = "app_detail/$packageName?minutes=$initialMinutes"
     fun historyDay(epochDay: Long) = "history_day/$epochDay"
+    // ModeDetailViewModel.NEW_MODE_ID marks "creating a new mode" rather than editing an existing one.
+    fun modeDetail(modeId: Long = ModeDetailViewModel.NEW_MODE_ID) = "mode_detail/$modeId"
 }
 
 // Navigation-compose defaults every destination to EnterTransition.None/ExitTransition.None
@@ -66,13 +73,15 @@ fun OwnScreenNavHost(navController: NavHostController = rememberNavController())
             DashboardScreen(
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenAppDetail = { pkg, minutes -> navController.navigate(Routes.appDetail(pkg, minutes)) },
-                onOpenHistory = { navController.navigate(Routes.HISTORY) }
+                onOpenHistory = { navController.navigate(Routes.HISTORY) },
+                onOpenModes = { navController.navigate(Routes.MODES) }
             )
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
-                onOpenAppList = { navController.navigate(Routes.APP_LIST) }
+                onOpenAppList = { navController.navigate(Routes.APP_LIST) },
+                onOpenModes = { navController.navigate(Routes.MODES) }
             )
         }
         composable(
@@ -109,6 +118,23 @@ fun OwnScreenNavHost(navController: NavHostController = rememberNavController())
             val epochDay = backStackEntry.arguments?.getLong("epochDay") ?: 0L
             HistoryDayScreen(
                 epochDay = epochDay,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.MODES) {
+            ModesScreen(
+                onBack = { navController.popBackStack() },
+                onOpenModeDetail = { modeId -> navController.navigate(Routes.modeDetail(modeId)) },
+                onCreateMode = { navController.navigate(Routes.modeDetail()) }
+            )
+        }
+        composable(
+            Routes.MODE_DETAIL,
+            arguments = listOf(navArgument("modeId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val modeId = backStackEntry.arguments?.getLong("modeId") ?: ModeDetailViewModel.NEW_MODE_ID
+            ModeDetailScreen(
+                modeId = modeId,
                 onBack = { navController.popBackStack() }
             )
         }
