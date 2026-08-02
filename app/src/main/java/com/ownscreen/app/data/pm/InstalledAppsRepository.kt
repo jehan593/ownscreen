@@ -20,15 +20,16 @@ data class LaunchableApp(
  * rarely changes — most callers just want "what's installed," not a live-updating view of it. In
  * particular the widget re-queries this on every refresh tick (every 15-300s while a widget
  * instance exists), which without caching means a full PackageManager scan + icon load for every
- * installed app that often, just to compute a top-3 list. A short TTL cache cuts that down
- * without needing an install/uninstall broadcast receiver — a newly installed app just takes up
- * to [CACHE_TTL_MILLIS] to show up, which is an acceptable trade for how much repeated work it
- * avoids.
+ * installed app that often, just to compute a top-3 list. A short TTL cache cuts that down; a
+ * package-add/remove broadcast (see [invalidate]) covers the case where a change happens inside
+ * that window instead of shrinking the TTL for everyone.
  */
 class InstalledAppsRepository(private val packageManager: PackageManager, private val selfPackage: String) {
 
     private val mutex = Mutex()
+    @Volatile
     private var cache: List<LaunchableApp>? = null
+    @Volatile
     private var cachedAtMillis: Long = 0L
 
     suspend fun getLaunchableApps(): List<LaunchableApp> = mutex.withLock {
@@ -41,6 +42,12 @@ class InstalledAppsRepository(private val packageManager: PackageManager, privat
         cache = fresh
         cachedAtMillis = now
         fresh
+    }
+
+    /** Drops the cached list so the next [getLaunchableApps] call re-queries PackageManager. */
+    fun invalidate() {
+        cache = null
+        cachedAtMillis = 0L
     }
 
     private suspend fun queryLaunchableApps(): List<LaunchableApp> = withContext(Dispatchers.Default) {

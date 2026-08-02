@@ -83,7 +83,7 @@ fun AppDetailScreen(packageName: String, initialMinutes: Int = -1, onBack: () ->
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-            uiState.icon?.let { AppIcon(icon = it, size = 56.dp) }
+            AppIcon(icon = uiState.icon, size = 56.dp)
 
             Spacer(modifier = Modifier.height(16.dp))
 

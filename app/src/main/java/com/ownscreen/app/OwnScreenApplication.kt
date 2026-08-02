@@ -1,6 +1,7 @@
 package com.ownscreen.app
 
 import android.app.Application
+import com.ownscreen.app.data.pm.PackageChangeReceiver
 import com.ownscreen.app.di.AppContainer
 import com.ownscreen.app.di.DefaultAppContainer
 import com.ownscreen.app.widget.WidgetRefreshAlarmReceiver
@@ -13,5 +14,6 @@ class OwnScreenApplication : Application() {
         super.onCreate()
         container = DefaultAppContainer(this)
         WidgetRefreshAlarmReceiver.schedule(this)
+        PackageChangeReceiver(container.installedAppsRepository).register(this)
     }
 }
